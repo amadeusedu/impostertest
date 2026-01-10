@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "Imposter – Question Game",
+    "slug": "imposter-question-game",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "sdkVersion": "50.0.0",
+    "userInterfaceStyle": "dark",
+    "jsEngine": "hermes",
+    "platforms": ["ios", "android", "web"],
+    "extra": {
+      "eas": {
+        "projectId": "00000000-0000-0000-0000-000000000000"
+      }
+    }
+  }
+}
