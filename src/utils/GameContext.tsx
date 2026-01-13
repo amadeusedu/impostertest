@@ -13,10 +13,12 @@ interface GameContextValue {
   players: Player[];
   imposterCount: number;
   showCategory: boolean;
+  selectedCategories: string[];
   round: RoundState | null;
   recentQuestionIds: string[];
   setImposterCount: (count: number) => void;
   setShowCategory: (value: boolean) => void;
+  setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
   updatePlayerName: (id: string, name: string) => void;
   addPlayer: () => void;
   removePlayer: () => void;
@@ -41,6 +43,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [players, setPlayers] = useState<Player[]>(createDefaultPlayers());
   const [imposterCount, setImposterCount] = useState(1);
   const [showCategory, setShowCategory] = useState(true);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [round, setRound] = useState<RoundState | null>(null);
   const [recentQuestionIds, setRecentQuestionIds] = useState<string[]>([]);
 
@@ -60,7 +63,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const startGame = () => {
-    const { pair, nextRecent } = pickQuestionPair(questionPairs, recentQuestionIds);
+    const filteredPairs =
+      selectedCategories.length > 0
+        ? questionPairs.filter((pair) => selectedCategories.includes(pair.category))
+        : questionPairs;
+    const pool = filteredPairs.length > 0 ? filteredPairs : questionPairs;
+    const { pair, nextRecent } = pickQuestionPair(pool, recentQuestionIds);
     setRecentQuestionIds(nextRecent);
     setRound(createRound(players, imposterCount, pair));
   };
@@ -109,7 +117,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const playAgain = () => {
-    const { pair, nextRecent } = pickQuestionPair(questionPairs, recentQuestionIds);
+    const filteredPairs =
+      selectedCategories.length > 0
+        ? questionPairs.filter((pair) => selectedCategories.includes(pair.category))
+        : questionPairs;
+    const pool = filteredPairs.length > 0 ? filteredPairs : questionPairs;
+    const { pair, nextRecent } = pickQuestionPair(pool, recentQuestionIds);
     setRecentQuestionIds(nextRecent);
     setRound(createRound(players, imposterCount, pair));
   };
@@ -124,10 +137,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       players,
       imposterCount,
       showCategory,
+      selectedCategories,
       round,
       recentQuestionIds,
       setImposterCount,
       setShowCategory,
+      setSelectedCategories,
       updatePlayerName,
       addPlayer,
       removePlayer,
@@ -144,10 +159,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       players,
       imposterCount,
       showCategory,
+      selectedCategories,
       round,
       recentQuestionIds,
       setImposterCount,
       setShowCategory,
+      setSelectedCategories,
     ]
   );
 

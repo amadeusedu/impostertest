@@ -367,6 +367,186 @@ export const questionPairs: QuestionPair[] = [
     alt: 'What would you do if you had a bonus hour off?'
   },
   {
+    id: 'intense-1',
+    category: 'Intense',
+    main: 'What is the boldest thing you have said on a date?',
+    alt: 'What is the boldest compliment you have given?'
+  },
+  {
+    id: 'intense-2',
+    category: 'Intense',
+    main: 'What is your go-to flirt move?',
+    alt: 'What is a flirt move that always works on you?'
+  },
+  {
+    id: 'intense-3',
+    category: 'Intense',
+    main: 'What is your most chaotic party story?',
+    alt: 'What is your most chaotic travel story?'
+  },
+  {
+    id: 'intense-4',
+    category: 'Intense',
+    main: 'What song would be your late-night anthem?',
+    alt: 'What song instantly makes you feel hot?'
+  },
+  {
+    id: 'intense-5',
+    category: 'Intense',
+    main: 'What is the biggest red flag you ignored in the past?',
+    alt: 'What is the biggest red flag you learned to avoid?'
+  },
+  {
+    id: 'intense-6',
+    category: 'Intense',
+    main: 'What is the most daring place you would kiss someone?',
+    alt: 'What is the most daring place you would sneak away?'
+  },
+  {
+    id: 'intense-7',
+    category: 'Intense',
+    main: 'What is the worst text you have sent after midnight?',
+    alt: 'What is the worst text you have received after midnight?'
+  },
+  {
+    id: 'intense-8',
+    category: 'Intense',
+    main: 'What is your hottest take about dating apps?',
+    alt: 'What is your hottest take about first dates?'
+  },
+  {
+    id: 'intense-9',
+    category: 'Intense',
+    main: 'What is your most dramatic break-up story?',
+    alt: 'What is your most dramatic friendship fallout story?'
+  },
+  {
+    id: 'intense-10',
+    category: 'Intense',
+    main: 'What is the most scandalous rumor you have heard at a party?',
+    alt: 'What is the most scandalous rumor you have heard at work?'
+  },
+  {
+    id: 'intense-11',
+    category: 'Intense',
+    main: 'What is your favorite guilty pleasure attraction?',
+    alt: 'What is your favorite guilty pleasure crush type?'
+  },
+  {
+    id: 'intense-12',
+    category: 'Intense',
+    main: 'What is the wildest dare you would actually do?',
+    alt: 'What is the wildest dare you would never do?'
+  },
+  {
+    id: 'intense-13',
+    category: 'Intense',
+    main: 'What is the most flirty thing you would say to someone?',
+    alt: 'What is the most flirty thing someone could say to you?'
+  },
+  {
+    id: 'intense-14',
+    category: 'Intense',
+    main: 'What is your most embarrassing romantic moment?',
+    alt: 'What is your most embarrassing party moment?'
+  },
+  {
+    id: 'intense-15',
+    category: 'Intense',
+    main: 'What is the most attractive confidence move?',
+    alt: 'What is the most attractive vibe someone can have?'
+  },
+  {
+    id: 'intense-16',
+    category: 'Intense',
+    main: 'What is your favorite spicy compliment to give?',
+    alt: 'What is your favorite spicy compliment to receive?'
+  },
+  {
+    id: 'intense-17',
+    category: 'Intense',
+    main: 'What is a party rule you secretly break?',
+    alt: 'What is a party rule you always enforce?'
+  },
+  {
+    id: 'intense-18',
+    category: 'Intense',
+    main: 'What is the best place for a late-night hangout?',
+    alt: 'What is the best place for a late-night snack run?'
+  },
+  {
+    id: 'intense-19',
+    category: 'Intense',
+    main: 'What is your most impulsive night-out decision?',
+    alt: 'What is your most impulsive date decision?'
+  },
+  {
+    id: 'intense-20',
+    category: 'Intense',
+    main: 'What is your biggest “I should not have posted that” moment?',
+    alt: 'What is your biggest “I should not have said that” moment?'
+  },
+  {
+    id: 'intense-21',
+    category: 'Intense',
+    main: 'What is your most unforgettable first impression story?',
+    alt: 'What is your most unforgettable last impression story?'
+  },
+  {
+    id: 'intense-22',
+    category: 'Intense',
+    main: 'What is the most intense movie scene you have watched with friends?',
+    alt: 'What is the most intense show scene you have watched with friends?'
+  },
+  {
+    id: 'intense-23',
+    category: 'Intense',
+    main: 'What is the best “after party” snack?',
+    alt: 'What is the best “after party” playlist vibe?'
+  },
+  {
+    id: 'intense-24',
+    category: 'Intense',
+    main: 'What is your most dramatic “will they, won’t they” story?',
+    alt: 'What is your most dramatic “plot twist” story?'
+  },
+  {
+    id: 'intense-25',
+    category: 'Intense',
+    main: 'What is the most seductive scent?',
+    alt: 'What is the most seductive outfit vibe?'
+  },
+  {
+    id: 'intense-26',
+    category: 'Intense',
+    main: 'What is the boldest thing you would do on a dare?',
+    alt: 'What is the boldest thing you would do for a crush?'
+  },
+  {
+    id: 'intense-27',
+    category: 'Intense',
+    main: 'What is the most notorious party game?',
+    alt: 'What is the most notorious party rule?'
+  },
+  {
+    id: 'intense-28',
+    category: 'Intense',
+    main: 'What is your favorite late-night confession topic?',
+    alt: 'What is your favorite late-night debate topic?'
+  },
+  {
+    id: 'intense-29',
+    category: 'Intense',
+    main: 'What is the most flirtatious emoji to send?',
+    alt: 'What is the most flirtatious gif to send?'
+  },
+  {
+    id: 'intense-30',
+    category: 'Intense',
+    main: 'What is the best way to signal “I am into you”?',
+    alt: 'What is the worst way to signal “I am into you”?'
+  },
+  {
     id: 'random-1',
     category: 'Random',
     main: 'What is the best smell?',
@@ -397,3 +577,7 @@ export const questionPairs: QuestionPair[] = [
     alt: 'What is your favorite time of day?'
   }
 ];
+
+export const categoryList = Array.from(
+  questionPairs.reduce((set, pair) => set.add(pair.category), new Set<string>())
+);
