@@ -8,14 +8,17 @@ import PassPhoneScreen from '../screens/PassPhoneScreen';
 import PlayerTurnScreen from '../screens/PlayerTurnScreen';
 import AllAnswersScreen from '../screens/AllAnswersScreen';
 import VotingScreen from '../screens/VotingScreen';
-import ResultsRevealScreen from '../screens/ResultsRevealScreen';
+import VotingResultsScreen from '../screens/VotingResultsScreen';
+import RevealScreen from '../screens/RevealScreen';
 import CategoriesScreen from '../screens/CategoriesScreen';
+import CategoryDetailScreen from '../screens/CategoryDetailScreen';
 import OtherPartyGamesScreen from '../screens/OtherPartyGamesScreen';
 
 export type RootStackParamList = {
   Settings: undefined;
   PlayerNames: undefined;
   Categories: undefined;
+  CategoryDetail: { category: string };
   PlayersGrid: undefined;
   PassPhone: {
     title: string;
@@ -27,7 +30,8 @@ export type RootStackParamList = {
   PlayerTurn: { playerId: string };
   AllAnswers: undefined;
   Voting: undefined;
-  ResultsReveal: undefined;
+  VotingResults: undefined;
+  Reveal: undefined;
   OtherPartyGames: undefined;
 };
 
@@ -40,7 +44,7 @@ const RootNavigator = () => {
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: '#0B0A10' },
-          animation: 'fade',
+          animation: 'fade_from_bottom',
         }}
       >
         <Stack.Screen name="Settings" component={GameSettingsScreen} />
@@ -55,6 +59,11 @@ const RootNavigator = () => {
           options={{ animation: 'slide_from_bottom' }}
         />
         <Stack.Screen
+          name="CategoryDetail"
+          component={CategoryDetailScreen}
+          options={{ animation: 'fade_from_bottom' }}
+        />
+        <Stack.Screen
           name="PlayersGrid"
           component={PlayersGridScreen}
           options={{ animation: 'fade_from_bottom' }}
@@ -63,7 +72,8 @@ const RootNavigator = () => {
         <Stack.Screen name="PlayerTurn" component={PlayerTurnScreen} />
         <Stack.Screen name="AllAnswers" component={AllAnswersScreen} />
         <Stack.Screen name="Voting" component={VotingScreen} />
-        <Stack.Screen name="ResultsReveal" component={ResultsRevealScreen} />
+        <Stack.Screen name="VotingResults" component={VotingResultsScreen} />
+        <Stack.Screen name="Reveal" component={RevealScreen} />
         <Stack.Screen
           name="OtherPartyGames"
           component={OtherPartyGamesScreen}

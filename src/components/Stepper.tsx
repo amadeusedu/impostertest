@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import { colors, radii, typography } from '../theme/tokens';
+import AnimatedPressable from './AnimatedPressable';
 
 interface StepperProps {
   value: number;
@@ -15,13 +16,21 @@ const Stepper = ({ value, min, max, onChange }: StepperProps) => {
 
   return (
     <View style={styles.container}>
-      <Pressable style={[styles.button, value === min && styles.disabled]} onPress={decrement}>
+      <AnimatedPressable
+        style={[styles.button, value === min && styles.disabled]}
+        onPress={decrement}
+        disabled={value === min}
+      >
         <Text style={styles.buttonLabel}>-</Text>
-      </Pressable>
+      </AnimatedPressable>
       <Text style={styles.value}>{value}</Text>
-      <Pressable style={[styles.button, value === max && styles.disabled]} onPress={increment}>
+      <AnimatedPressable
+        style={[styles.button, value === max && styles.disabled]}
+        onPress={increment}
+        disabled={value === max}
+      >
         <Text style={styles.buttonLabel}>+</Text>
-      </Pressable>
+      </AnimatedPressable>
     </View>
   );
 };

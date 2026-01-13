@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import GradientBackground from '../components/GradientBackground';
 import Card from '../components/Card';
 import PrimaryButton from '../components/PrimaryButton';
+import AnimatedPressable from '../components/AnimatedPressable';
+import AnimatedEntry from '../components/AnimatedEntry';
 import { categoryList } from '../data/questions';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { colors, spacing, typography, radii } from '../theme/tokens';
@@ -25,58 +27,65 @@ const CategoriesScreen = () => {
     return `${activeCount} categories selected`;
   }, [activeCount, selectedCategories]);
 
-  const toggleCategory = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category) ? prev.filter((item) => item !== category) : [...prev, category]
-    );
-  };
-
   return (
     <GradientBackground>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Categories</Text>
-        <Text style={styles.subtitle}>{summary}</Text>
+        <AnimatedEntry>
+          <Text style={styles.title}>Categories</Text>
+          <Text style={styles.subtitle}>{summary}</Text>
+        </AnimatedEntry>
 
-        <Card style={styles.allCategoriesCard}>
-          <Pressable
-            onPress={() => setSelectedCategories([])}
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-          >
-            <View>
-              <Text style={styles.cardTitle}>All Categories</Text>
-              <Text style={styles.cardSubtitle}>Mix every category together</Text>
-            </View>
-            {activeCount === 0 && <Text style={styles.selectedBadge}>Selected</Text>}
-          </Pressable>
-        </Card>
+        <AnimatedEntry delay={80}>
+          <Card style={styles.allCategoriesCard}>
+            <AnimatedPressable
+              onPress={() => setSelectedCategories([])}
+              style={styles.row}
+              pressableStyle={styles.rowPressable}
+            >
+              <View>
+                <Text style={styles.cardTitle}>All Categories</Text>
+                <Text style={styles.cardSubtitle}>Mix every category together</Text>
+              </View>
+              {activeCount === 0 && <Text style={styles.selectedBadge}>Selected</Text>}
+            </AnimatedPressable>
+          </Card>
+        </AnimatedEntry>
 
-        <View style={styles.list}>
+        <AnimatedEntry delay={140} style={styles.list}>
           {categoryList.map((category) => {
             const selected = selectedCategories.includes(category);
             return (
               <Card key={category}>
-                <Pressable
-                  onPress={() => toggleCategory(category)}
-                  style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+                <AnimatedPressable
+                  onPress={() => navigation.navigate('CategoryDetail', { category })}
+                  style={styles.row}
+                  pressableStyle={styles.rowPressable}
                 >
-                  <View>
-                    <Text style={styles.cardTitle}>{category}</Text>
+                  <View style={styles.cardText}>
+                    <Text style={styles.cardTitle} numberOfLines={1} adjustsFontSizeToFit>
+                      {category}
+                    </Text>
                     <Text style={styles.cardSubtitle}>
-                      {selected ? 'Included in the rotation' : 'Tap to include this category'}
+                      {selected ? 'Included in the rotation' : 'Tap to view questions'}
                     </Text>
                   </View>
                   {selected && <Text style={styles.selectedBadge}>Selected</Text>}
-                </Pressable>
+                </AnimatedPressable>
               </Card>
             );
           })}
-        </View>
+        </AnimatedEntry>
 
-        <PrimaryButton label="Done" onPress={() => navigation.goBack()} />
+        <AnimatedEntry delay={220}>
+          <PrimaryButton label="Done" onPress={() => navigation.goBack()} />
 
-        <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>Back to Settings</Text>
-        </Pressable>
+          <AnimatedPressable
+            pressableStyle={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backText}>Back to Settings</Text>
+          </AnimatedPressable>
+        </AnimatedEntry>
       </ScrollView>
     </GradientBackground>
   );
@@ -105,9 +114,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
   },
-  rowPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.98 }],
+  rowPressable: {
+    borderRadius: radii.lg,
+  },
+  cardText: {
+    flex: 1,
   },
   cardTitle: {
     color: colors.white,

@@ -1,9 +1,11 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import GradientBackground from '../components/GradientBackground';
 import Card from '../components/Card';
+import AnimatedPressable from '../components/AnimatedPressable';
+import AnimatedEntry from '../components/AnimatedEntry';
 import { colors, spacing, typography, radii } from '../theme/tokens';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useGame } from '../utils/GameContext';
@@ -16,7 +18,10 @@ const VotingScreen = () => {
     return null;
   }
 
-  const currentVoter = players.find((player) => player.id === round.currentVoterId);
+  const currentVoterIndex = players.findIndex((player) => player.id === round.currentVoterId);
+  const currentVoter = players[currentVoterIndex];
+  const currentVoterName =
+    currentVoter?.name?.trim() || (currentVoterIndex >= 0 ? `Player ${currentVoterIndex + 1}` : '');
   const hasVoted = !!round.votes[round.currentVoterId];
 
   const handleVote = (votedId: string) => {
@@ -25,47 +30,57 @@ const VotingScreen = () => {
     submitVote(round.currentVoterId, votedId);
     const next = players.find((player) => !updatedVotes[player.id]);
     if (next) {
+      const nextIndex = players.findIndex((player) => player.id === next.id);
+      const nextName = next.name?.trim() || `Player ${nextIndex + 1}`;
       setCurrentVoter(next.id);
       navigation.replace('PassPhone', {
         title: 'Pass the phone',
-        subtitle: `to ${next.name} to vote`,
-        buttonLabel: `I'm ${next.name}`,
+        subtitle: `to ${nextName} to vote`,
+        buttonLabel: `I'm ${nextName}`,
         nextScreen: 'Voting',
       });
       return;
     }
     setCurrentVoter(undefined);
-    navigation.replace('ResultsReveal');
+    navigation.replace('VotingResults');
   };
 
   return (
     <GradientBackground>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Voting</Text>
-        <Text style={styles.subtitle}>Voting as {currentVoter?.name}</Text>
-        <View style={styles.list}>
-          {players.map((player) => (
+        <AnimatedEntry>
+          <Text style={styles.title}>Voting</Text>
+          <Text style={styles.subtitle}>Voting as {currentVoterName}</Text>
+        </AnimatedEntry>
+        <AnimatedEntry delay={120} style={styles.list}>
+          {players.map((player, index) => {
+            const displayName = player.name?.trim() || `Player ${index + 1}`;
+            return (
             <Card key={player.id}>
               <View style={styles.voteRow}>
                 <View style={styles.voteInfo}>
-                  <Text style={styles.playerName}>{player.name}</Text>
+                  <Text style={styles.playerName}>{displayName}</Text>
                   <Text style={styles.answerText}>
                     {round.answers[player.id] || 'No answer submitted.'}
                   </Text>
                 </View>
-                <Pressable
+                <AnimatedPressable
                   style={[styles.voteButton, hasVoted && styles.voteDisabled]}
                   onPress={() => handleVote(player.id)}
                   disabled={hasVoted}
+                  pressableStyle={styles.votePressable}
                 >
                   <Text style={styles.voteText}>Vote</Text>
-                </Pressable>
+                </AnimatedPressable>
               </View>
             </Card>
-          ))}
-        </View>
+          );
+          })}
+        </AnimatedEntry>
         {!players.find((player) => !round.votes[player.id]) && hasVoted && (
-          <Text style={styles.hint}>Waiting for results...</Text>
+          <AnimatedEntry delay={200}>
+            <Text style={styles.hint}>Waiting for results...</Text>
+          </AnimatedEntry>
         )}
       </ScrollView>
     </GradientBackground>
@@ -113,6 +128,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: radii.pill,
     backgroundColor: colors.grapeSoda,
+  },
+  votePressable: {
+    borderRadius: radii.pill,
   },
   voteText: {
     color: colors.white,
