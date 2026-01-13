@@ -33,6 +33,7 @@ interface GameContextValue {
 }
 
 const defaultPlayers = ['Alex', 'Lucas', 'Nic', 'Dimi', 'Steli'];
+const maxPlayers = 100;
 
 const createDefaultPlayers = () =>
   defaultPlayers.map((name) => ({ id: generateId(), name }));
@@ -53,6 +54,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addPlayer = () => {
     setPlayers((prev) => {
+      if (prev.length >= maxPlayers) {
+        return prev;
+      }
       const nextIndex = prev.length + 1;
       return [...prev, { id: generateId(), name: `Player ${nextIndex}` }];
     });

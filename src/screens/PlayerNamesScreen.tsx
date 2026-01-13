@@ -14,75 +14,89 @@ import { useGame } from '../utils/GameContext';
 const PlayerNamesScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { players, updatePlayerName, addPlayer, removePlayer } = useGame();
+  const minPlayers = 3;
+  const maxPlayers = 100;
+  const canRemove = players.length > minPlayers;
+  const canAdd = players.length < maxPlayers;
 
   return (
     <GradientBackground>
-      <ScrollView contentContainerStyle={styles.container}>
-        <AnimatedEntry>
-          <Text style={styles.title}>Player Names</Text>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryText}>{players.length} Players</Text>
-            <Text style={styles.summaryRange}>3–100</Text>
-          </View>
-        </AnimatedEntry>
+      <View style={styles.screen}>
+        <ScrollView contentContainerStyle={styles.container}>
+          <AnimatedEntry>
+            <Text style={styles.title}>Player Names</Text>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryText}>{players.length} Players</Text>
+              <Text style={styles.summaryRange}>{minPlayers}–{maxPlayers}</Text>
+            </View>
+          </AnimatedEntry>
 
-        <AnimatedEntry delay={120} style={styles.list}>
-          {players.map((player, index) => (
-            <Card key={player.id}>
-              <View style={styles.playerRow}>
-                <PlayerAvatar name={player.name} />
-                <View style={styles.inputColumn}>
-                  <Text style={styles.badge}>#{index + 1}</Text>
-                  <TextInput
-                    value={player.name}
-                    onChangeText={(text) => updatePlayerName(player.id, text)}
-                    placeholder="Player name"
-                    placeholderTextColor={colors.amethystSmoke}
-                    style={styles.input}
-                  />
-                </View>
-              </View>
-            </Card>
-          ))}
-        </AnimatedEntry>
+          <AnimatedEntry delay={120} style={styles.list}>
+            {players.map((player, index) => {
+              const displayName = player.name?.trim() || `Player ${index + 1}`;
+              return (
+                <Card key={player.id}>
+                  <View style={styles.playerRow}>
+                    <PlayerAvatar name={displayName} />
+                    <View style={styles.inputColumn}>
+                      <Text style={styles.badge}>#{index + 1}</Text>
+                      <TextInput
+                        value={player.name}
+                        onChangeText={(text) => updatePlayerName(player.id, text)}
+                        placeholder="Player name"
+                        placeholderTextColor={colors.amethystSmoke}
+                        style={styles.input}
+                      />
+                    </View>
+                  </View>
+                </Card>
+              );
+            })}
+          </AnimatedEntry>
 
-        <AnimatedEntry delay={200}>
+          <AnimatedEntry delay={220}>
+            <AnimatedPressable
+              pressableStyle={styles.backButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={styles.backText}>Back to Settings</Text>
+            </AnimatedPressable>
+          </AnimatedEntry>
+        </ScrollView>
+
+        <View style={styles.actionBar}>
           <View style={styles.actions}>
             <AnimatedPressable
-              style={[styles.actionButton, players.length <= 3 && styles.disabled]}
+              style={[styles.actionButton, !canRemove && styles.actionButtonDisabled]}
               pressableStyle={styles.actionButton}
               onPress={removePlayer}
-              disabled={players.length <= 3}
+              disabled={!canRemove}
             >
               <Text style={styles.actionText}>Remove</Text>
             </AnimatedPressable>
             <AnimatedPressable
-              style={styles.actionButton}
+              style={[styles.actionButton, !canAdd && styles.actionButtonDisabled]}
               pressableStyle={styles.actionButton}
               onPress={addPlayer}
+              disabled={!canAdd}
             >
               <Text style={styles.actionText}>Add</Text>
             </AnimatedPressable>
           </View>
-        </AnimatedEntry>
-
-        <AnimatedEntry delay={260}>
-          <AnimatedPressable
-            pressableStyle={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={styles.backText}>Back to Settings</Text>
-          </AnimatedPressable>
-        </AnimatedEntry>
-      </ScrollView>
+        </View>
+      </View>
     </GradientBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   container: {
     padding: spacing.lg,
     gap: spacing.lg,
+    paddingBottom: spacing.xxl * 2,
   },
   title: {
     fontSize: typography.title,
@@ -129,25 +143,32 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.amethystSmoke,
     paddingVertical: 6,
   },
+  actionBar: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
+  },
   actions: {
     flexDirection: 'row',
     gap: spacing.md,
   },
   actionButton: {
     flex: 1,
+    minHeight: 48,
     borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.grapeSoda,
+    backgroundColor: colors.surface,
     paddingVertical: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionButtonDisabled: {
+    opacity: 0.4,
   },
   actionText: {
     color: colors.white,
     fontSize: typography.body,
     fontWeight: '600',
-  },
-  disabled: {
-    opacity: 0.4,
   },
   backButton: {
     alignItems: 'center',

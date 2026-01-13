@@ -3,10 +3,10 @@ import { View, Text, StyleSheet, FlatList, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import GradientBackground from '../components/GradientBackground';
-import Card from '../components/Card';
 import PrimaryButton from '../components/PrimaryButton';
 import AnimatedPressable from '../components/AnimatedPressable';
 import AnimatedEntry from '../components/AnimatedEntry';
+import PlayerTile from '../components/PlayerTile';
 import { colors, spacing, typography, radii } from '../theme/tokens';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useGame } from '../utils/GameContext';
@@ -38,6 +38,10 @@ const PlayersGridScreen = () => {
   }
 
   const allAnswered = round.completedPlayerIds.length === players.length;
+  const getDisplayName = (name: string | undefined, index: number) => {
+    const trimmed = name?.trim();
+    return trimmed ? trimmed : `Player ${index + 1}`;
+  };
   const glowScale = useMemo(
     () =>
       pulse.interpolate({
@@ -68,12 +72,12 @@ const PlayersGridScreen = () => {
         <FlatList
           data={players}
           numColumns={2}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item, index) => item.id ?? `${index}-${item.name}`}
           columnWrapperStyle={styles.column}
           contentContainerStyle={styles.grid}
           renderItem={({ item, index }) => {
             const completed = round.completedPlayerIds.includes(item.id);
-            const displayName = item.name?.trim() || `Player ${index + 1}`;
+            const displayName = getDisplayName(item.name, index);
             return (
               <AnimatedPressable
                 style={styles.tile}
@@ -97,22 +101,11 @@ const PlayersGridScreen = () => {
                       { opacity: glowOpacity, transform: [{ scale: glowScale }] },
                     ]}
                   />
-                  <Card style={[styles.card, completed && styles.cardCompleted]}>
-                    <View style={styles.cardContent}>
-                      <Text
-                        style={styles.playerName}
-                        numberOfLines={2}
-                        adjustsFontSizeToFit
-                        minimumFontScale={0.8}
-                      >
-                        {displayName}
-                      </Text>
-                      <Text style={styles.playerHint}>
-                        {completed ? 'Answer submitted' : 'Tap to answer'}
-                      </Text>
-                      {completed && <Text style={styles.check}>✓</Text>}
-                    </View>
-                  </Card>
+                  <PlayerTile
+                    name={displayName}
+                    completed={completed}
+                    statusText={completed ? 'Answer submitted' : 'Tap to answer'}
+                  />
                 </View>
               </AnimatedPressable>
             );
@@ -164,9 +157,6 @@ const styles = StyleSheet.create({
   tileInner: {
     position: 'relative',
   },
-  card: {
-    height: 140,
-  },
   pulseBorder: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: radii.lg,
@@ -175,32 +165,6 @@ const styles = StyleSheet.create({
   },
   pulseBorderCompleted: {
     borderColor: colors.success,
-  },
-  cardCompleted: {
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    borderColor: colors.success,
-  },
-  cardContent: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-  },
-  playerName: {
-    color: colors.white,
-    fontSize: typography.heading,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  playerHint: {
-    color: colors.icyBlue,
-    fontSize: typography.caption,
-  },
-  check: {
-    color: colors.success,
-    fontSize: typography.subheading,
-    fontWeight: '700',
   },
   primaryButton: {
     marginTop: spacing.lg,
