@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import GradientBackground from '../components/GradientBackground';
 import PrimaryButton from '../components/PrimaryButton';
+import AnimatedEntry from '../components/AnimatedEntry';
 import { colors, spacing, typography } from '../theme/tokens';
 import { RootStackParamList } from '../navigation/RootNavigator';
 
@@ -16,12 +17,21 @@ const PassPhoneScreen = () => {
   return (
     <GradientBackground>
       <View style={styles.container}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
-        <PrimaryButton
-          label={buttonLabel}
-          onPress={() => navigation.replace(nextScreen, nextParams)}
-        />
+        <AnimatedEntry>
+          <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit>
+            {title}
+          </Text>
+          <Text style={styles.subtitle} numberOfLines={2} adjustsFontSizeToFit>
+            {subtitle}
+          </Text>
+        </AnimatedEntry>
+        <AnimatedEntry delay={120}>
+          <PrimaryButton
+            label={buttonLabel}
+            onPress={() => navigation.replace(nextScreen, nextParams)}
+            textStyle={styles.buttonText}
+          />
+        </AnimatedEntry>
       </View>
     </GradientBackground>
   );
@@ -44,6 +54,9 @@ const styles = StyleSheet.create({
     fontSize: typography.subheading,
     color: colors.icyBlue,
     textAlign: 'center',
+  },
+  buttonText: {
+    paddingHorizontal: spacing.sm,
   },
 });
 

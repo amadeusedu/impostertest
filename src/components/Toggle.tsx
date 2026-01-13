@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors, radii, typography } from '../theme/tokens';
+import AnimatedPressable from './AnimatedPressable';
 
 interface ToggleProps {
   label: string;
@@ -10,12 +11,12 @@ interface ToggleProps {
 
 const Toggle = ({ label, value, onChange }: ToggleProps) => {
   return (
-    <Pressable style={styles.container} onPress={() => onChange(!value)}>
+    <AnimatedPressable style={styles.container} onPress={() => onChange(!value)}>
       <Text style={styles.label}>{label}</Text>
       <View style={[styles.track, value && styles.trackOn]}>
         <View style={[styles.thumb, value && styles.thumbOn]} />
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 };
 

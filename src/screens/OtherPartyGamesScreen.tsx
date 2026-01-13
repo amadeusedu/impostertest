@@ -1,9 +1,11 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import GradientBackground from '../components/GradientBackground';
 import Card from '../components/Card';
+import AnimatedPressable from '../components/AnimatedPressable';
+import AnimatedEntry from '../components/AnimatedEntry';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { colors, spacing, typography, radii } from '../theme/tokens';
 
@@ -40,12 +42,14 @@ const OtherPartyGamesScreen = () => {
   return (
     <GradientBackground>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Other Party Games</Text>
-        <Text style={styles.subtitle}>
-          We are cooking up more game modes. Here is what is next.
-        </Text>
+        <AnimatedEntry>
+          <Text style={styles.title}>Other Party Games</Text>
+          <Text style={styles.subtitle}>
+            We are cooking up more game modes. Here is what is next.
+          </Text>
+        </AnimatedEntry>
 
-        <View style={styles.list}>
+        <AnimatedEntry delay={120} style={styles.list}>
           {games.map((game) => (
             <Card key={game.title}>
               <View style={styles.row}>
@@ -57,11 +61,16 @@ const OtherPartyGamesScreen = () => {
               </View>
             </Card>
           ))}
-        </View>
+        </AnimatedEntry>
 
-        <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>Back to Settings</Text>
-        </Pressable>
+        <AnimatedEntry delay={200}>
+          <AnimatedPressable
+            pressableStyle={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backText}>Back to Settings</Text>
+          </AnimatedPressable>
+        </AnimatedEntry>
       </ScrollView>
     </GradientBackground>
   );

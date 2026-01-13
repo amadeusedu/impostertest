@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import GradientBackground from '../components/GradientBackground';
 import Card from '../components/Card';
 import PrimaryButton from '../components/PrimaryButton';
+import AnimatedEntry from '../components/AnimatedEntry';
 import { colors, spacing, typography } from '../theme/tokens';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useGame } from '../utils/GameContext';
@@ -21,10 +22,11 @@ const AllAnswersScreen = () => {
     startVoting();
     const firstPlayer = players[0];
     if (!firstPlayer) return;
+    const displayName = firstPlayer.name?.trim() || 'Player 1';
     navigation.replace('PassPhone', {
       title: 'Pass the phone',
-      subtitle: `to ${firstPlayer.name} to vote`,
-      buttonLabel: `I'm ${firstPlayer.name}`,
+      subtitle: `to ${displayName} to vote`,
+      buttonLabel: `I'm ${displayName}`,
       nextScreen: 'Voting',
     });
   };
@@ -32,18 +34,25 @@ const AllAnswersScreen = () => {
   return (
     <GradientBackground>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>All Answers</Text>
-        <View style={styles.list}>
-          {players.map((player) => (
+        <AnimatedEntry>
+          <Text style={styles.title}>All Answers</Text>
+        </AnimatedEntry>
+        <AnimatedEntry delay={120} style={styles.list}>
+          {players.map((player, index) => {
+            const displayName = player.name?.trim() || `Player ${index + 1}`;
+            return (
             <Card key={player.id}>
-              <Text style={styles.playerName}>{player.name}</Text>
+              <Text style={styles.playerName}>{displayName}</Text>
               <Text style={styles.answerText}>
                 {round.answers[player.id] || 'No answer submitted.'}
               </Text>
             </Card>
-          ))}
-        </View>
-        <PrimaryButton label="Start Voting" onPress={handleStartVoting} />
+          );
+          })}
+        </AnimatedEntry>
+        <AnimatedEntry delay={200}>
+          <PrimaryButton label="Start Voting" onPress={handleStartVoting} />
+        </AnimatedEntry>
       </ScrollView>
     </GradientBackground>
   );

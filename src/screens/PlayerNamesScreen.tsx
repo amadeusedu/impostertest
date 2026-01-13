@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import GradientBackground from '../components/GradientBackground';
 import Card from '../components/Card';
 import PlayerAvatar from '../components/PlayerAvatar';
+import AnimatedPressable from '../components/AnimatedPressable';
+import AnimatedEntry from '../components/AnimatedEntry';
 import { colors, spacing, typography, radii } from '../theme/tokens';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useGame } from '../utils/GameContext';
@@ -16,13 +18,15 @@ const PlayerNamesScreen = () => {
   return (
     <GradientBackground>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Player Names</Text>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryText}>{players.length} Players</Text>
-          <Text style={styles.summaryRange}>3–100</Text>
-        </View>
+        <AnimatedEntry>
+          <Text style={styles.title}>Player Names</Text>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryText}>{players.length} Players</Text>
+            <Text style={styles.summaryRange}>3–100</Text>
+          </View>
+        </AnimatedEntry>
 
-        <View style={styles.list}>
+        <AnimatedEntry delay={120} style={styles.list}>
           {players.map((player, index) => (
             <Card key={player.id}>
               <View style={styles.playerRow}>
@@ -40,24 +44,36 @@ const PlayerNamesScreen = () => {
               </View>
             </Card>
           ))}
-        </View>
+        </AnimatedEntry>
 
-        <View style={styles.actions}>
-          <Pressable
-            style={[styles.actionButton, players.length <= 3 && styles.disabled]}
-            onPress={removePlayer}
-            disabled={players.length <= 3}
+        <AnimatedEntry delay={200}>
+          <View style={styles.actions}>
+            <AnimatedPressable
+              style={[styles.actionButton, players.length <= 3 && styles.disabled]}
+              pressableStyle={styles.actionButton}
+              onPress={removePlayer}
+              disabled={players.length <= 3}
+            >
+              <Text style={styles.actionText}>Remove</Text>
+            </AnimatedPressable>
+            <AnimatedPressable
+              style={styles.actionButton}
+              pressableStyle={styles.actionButton}
+              onPress={addPlayer}
+            >
+              <Text style={styles.actionText}>Add</Text>
+            </AnimatedPressable>
+          </View>
+        </AnimatedEntry>
+
+        <AnimatedEntry delay={260}>
+          <AnimatedPressable
+            pressableStyle={styles.backButton}
+            onPress={() => navigation.goBack()}
           >
-            <Text style={styles.actionText}>Remove</Text>
-          </Pressable>
-          <Pressable style={styles.actionButton} onPress={addPlayer}>
-            <Text style={styles.actionText}>Add</Text>
-          </Pressable>
-        </View>
-
-        <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>Back to Settings</Text>
-        </Pressable>
+            <Text style={styles.backText}>Back to Settings</Text>
+          </AnimatedPressable>
+        </AnimatedEntry>
       </ScrollView>
     </GradientBackground>
   );

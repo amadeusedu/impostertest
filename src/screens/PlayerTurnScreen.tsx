@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import GradientBackground from '../components/GradientBackground';
 import Card from '../components/Card';
 import PrimaryButton from '../components/PrimaryButton';
+import AnimatedEntry from '../components/AnimatedEntry';
 import { colors, spacing, typography } from '../theme/tokens';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useGame } from '../utils/GameContext';
@@ -21,6 +22,7 @@ const PlayerTurnScreen = () => {
   }
 
   const player = players.find((item) => item.id === playerId);
+  const playerName = player?.name?.trim() || 'Player';
   const question = getQuestionForPlayer(playerId);
 
   const handleSubmit = () => {
@@ -36,21 +38,31 @@ const PlayerTurnScreen = () => {
   return (
     <GradientBackground>
       <View style={styles.container}>
-        <Text style={styles.title}>{player?.name ?? 'Player'}</Text>
-        {showCategory && <Text style={styles.category}>{round.questionPair.category}</Text>}
-        <Card>
-          <Text style={styles.question}>{question}</Text>
-        </Card>
-        <Text style={styles.label}>Your Answer</Text>
-        <TextInput
-          value={answer}
-          onChangeText={setAnswer}
-          placeholder="Type your answer..."
-          placeholderTextColor={colors.amethystSmoke}
-          style={styles.input}
-          multiline
-        />
-        <PrimaryButton label="Submit Answer" onPress={handleSubmit} />
+        <AnimatedEntry>
+          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit>
+            {playerName}
+          </Text>
+          {showCategory && <Text style={styles.category}>{round.questionPair.category}</Text>}
+        </AnimatedEntry>
+        <AnimatedEntry delay={120}>
+          <Card>
+            <Text style={styles.question}>{question}</Text>
+          </Card>
+        </AnimatedEntry>
+        <AnimatedEntry delay={180}>
+          <Text style={styles.label}>Your Answer</Text>
+          <TextInput
+            value={answer}
+            onChangeText={setAnswer}
+            placeholder="Type your answer..."
+            placeholderTextColor={colors.amethystSmoke}
+            style={styles.input}
+            multiline
+          />
+        </AnimatedEntry>
+        <AnimatedEntry delay={240}>
+          <PrimaryButton label="Submit Answer" onPress={handleSubmit} />
+        </AnimatedEntry>
       </View>
     </GradientBackground>
   );
