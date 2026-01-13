@@ -9,10 +9,13 @@ import PlayerTurnScreen from '../screens/PlayerTurnScreen';
 import AllAnswersScreen from '../screens/AllAnswersScreen';
 import VotingScreen from '../screens/VotingScreen';
 import ResultsRevealScreen from '../screens/ResultsRevealScreen';
+import CategoriesScreen from '../screens/CategoriesScreen';
+import OtherPartyGamesScreen from '../screens/OtherPartyGamesScreen';
 
 export type RootStackParamList = {
   Settings: undefined;
   PlayerNames: undefined;
+  Categories: undefined;
   PlayersGrid: undefined;
   PassPhone: {
     title: string;
@@ -25,6 +28,7 @@ export type RootStackParamList = {
   AllAnswers: undefined;
   Voting: undefined;
   ResultsReveal: undefined;
+  OtherPartyGames: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -36,16 +40,35 @@ const RootNavigator = () => {
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: '#0B0A10' },
+          animation: 'fade',
         }}
       >
         <Stack.Screen name="Settings" component={GameSettingsScreen} />
-        <Stack.Screen name="PlayerNames" component={PlayerNamesScreen} />
-        <Stack.Screen name="PlayersGrid" component={PlayersGridScreen} />
+        <Stack.Screen
+          name="PlayerNames"
+          component={PlayerNamesScreen}
+          options={{ animation: 'slide_from_right' }}
+        />
+        <Stack.Screen
+          name="Categories"
+          component={CategoriesScreen}
+          options={{ animation: 'slide_from_bottom' }}
+        />
+        <Stack.Screen
+          name="PlayersGrid"
+          component={PlayersGridScreen}
+          options={{ animation: 'fade_from_bottom' }}
+        />
         <Stack.Screen name="PassPhone" component={PassPhoneScreen} />
         <Stack.Screen name="PlayerTurn" component={PlayerTurnScreen} />
         <Stack.Screen name="AllAnswers" component={AllAnswersScreen} />
         <Stack.Screen name="Voting" component={VotingScreen} />
         <Stack.Screen name="ResultsReveal" component={ResultsRevealScreen} />
+        <Stack.Screen
+          name="OtherPartyGames"
+          component={OtherPartyGamesScreen}
+          options={{ animation: 'slide_from_right' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

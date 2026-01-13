@@ -7,7 +7,7 @@ import Card from '../components/Card';
 import PrimaryButton from '../components/PrimaryButton';
 import Stepper from '../components/Stepper';
 import Toggle from '../components/Toggle';
-import { colors, spacing, typography } from '../theme/tokens';
+import { colors, spacing, typography, radii, shadows } from '../theme/tokens';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useGame } from '../utils/GameContext';
 
@@ -19,6 +19,7 @@ const GameSettingsScreen = () => {
     setImposterCount,
     showCategory,
     setShowCategory,
+    selectedCategories,
     startGame,
   } = useGame();
 
@@ -38,29 +39,50 @@ const GameSettingsScreen = () => {
     navigation.navigate('PlayersGrid');
   };
 
+  const categorySummary = useMemo(() => {
+    if (selectedCategories.length === 0) {
+      return 'All Categories';
+    }
+    if (selectedCategories.length <= 2) {
+      return selectedCategories.join(', ');
+    }
+    return `${selectedCategories.slice(0, 2).join(', ')} +${selectedCategories.length - 2}`;
+  }, [selectedCategories]);
+
   return (
     <GradientBackground>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Game Settings</Text>
 
         <View style={styles.row}>
-          <Card style={styles.halfCard}>
-            <Text style={styles.cardLabel}>How many players?</Text>
-            <Text style={styles.cardValue}>{players.length}</Text>
-          </Card>
-          <Card style={styles.halfCard}>
-            <Text style={styles.cardLabel}>How many imposters?</Text>
-            <Stepper
-              value={Math.min(imposterCount, maxImposters)}
-              min={1}
-              max={maxImposters}
-              onChange={setImposterCount}
-            />
-          </Card>
+          <Pressable
+            onPress={() => navigation.navigate('PlayerNames')}
+            style={({ pressed }) => [
+              styles.halfPressable,
+              pressed && styles.pressedCard,
+            ]}
+          >
+            <Card style={styles.halfCard}>
+              <Text style={styles.cardLabel}>How many players?</Text>
+              <Text style={styles.cardValue}>{players.length}</Text>
+              <Text style={styles.cardHint}>Tap to edit names</Text>
+            </Card>
+          </Pressable>
+          <View style={styles.halfPressable}>
+            <Card style={styles.halfCard}>
+              <Text style={styles.cardLabel}>How many imposters?</Text>
+              <Stepper
+                value={Math.min(imposterCount, maxImposters)}
+                min={1}
+                max={maxImposters}
+                onChange={setImposterCount}
+              />
+            </Card>
+          </View>
         </View>
 
         <Text style={styles.sectionLabel}>Game Mode</Text>
-        <Card>
+        <Card style={styles.cardShadow}>
           <Pressable style={styles.tileSelected}>
             <Text style={styles.tileTitle}>Question Game</Text>
             <Text style={styles.tileSubtitle}>Find who got a different question</Text>
@@ -68,12 +90,17 @@ const GameSettingsScreen = () => {
         </Card>
 
         <Text style={styles.sectionLabel}>Categories</Text>
-        <Card>
-          <Pressable style={styles.tileSelected}>
-            <Text style={styles.tileTitle}>All Categories</Text>
-            <Text style={styles.tileSubtitle}>Mix of every category</Text>
-          </Pressable>
-        </Card>
+        <Pressable
+          onPress={() => navigation.navigate('Categories')}
+          style={({ pressed }) => [pressed && styles.pressedCard]}
+        >
+          <Card style={[styles.cardShadow, styles.cardTouchable]}>
+            <View style={styles.tileSelected}>
+              <Text style={styles.tileTitle}>{categorySummary}</Text>
+              <Text style={styles.tileSubtitle}>Tap to choose categories</Text>
+            </View>
+          </Card>
+        </Pressable>
 
         <Card style={styles.toggleCard}>
           <Toggle
@@ -86,10 +113,10 @@ const GameSettingsScreen = () => {
         <PrimaryButton label="Start Game" onPress={handleStart} style={styles.primaryButton} />
 
         <Pressable
-          style={styles.secondaryButton}
-          onPress={() => navigation.navigate('PlayerNames')}
+          style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressedSecondary]}
+          onPress={() => navigation.navigate('OtherPartyGames')}
         >
-          <Text style={styles.secondaryText}>Edit Player Names</Text>
+          <Text style={styles.secondaryText}>OTHER PARTY GAMES</Text>
         </Pressable>
       </ScrollView>
     </GradientBackground>
@@ -100,6 +127,7 @@ const styles = StyleSheet.create({
   container: {
     padding: spacing.lg,
     gap: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   title: {
     fontSize: typography.title,
@@ -110,8 +138,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.md,
   },
+  halfPressable: {
+    flex: 1,
+  },
   halfCard: {
     flex: 1,
+    ...shadows.glow,
   },
   cardLabel: {
     color: colors.icyBlue,
@@ -125,10 +157,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: spacing.sm,
   },
+  cardHint: {
+    color: colors.amethystSmoke,
+    fontSize: typography.caption,
+    marginTop: spacing.xs,
+  },
   sectionLabel: {
     color: colors.amethystSmoke,
     fontSize: typography.subheading,
     fontWeight: '600',
+    letterSpacing: 0.4,
   },
   tileSelected: {
     gap: 6,
@@ -142,6 +180,12 @@ const styles = StyleSheet.create({
     color: colors.icyBlue,
     fontSize: typography.caption,
   },
+  cardShadow: {
+    ...shadows.glow,
+  },
+  cardTouchable: {
+    borderRadius: radii.lg,
+  },
   toggleCard: {
     paddingVertical: spacing.md,
   },
@@ -150,12 +194,23 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     alignItems: 'center',
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.grapeSoda,
   },
   secondaryText: {
-    color: colors.amethystSmoke,
-    fontSize: typography.body,
-    textDecorationLine: 'underline',
+    color: colors.white,
+    fontSize: typography.subheading,
+    fontWeight: '600',
+    letterSpacing: 0.6,
+  },
+  pressedCard: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  pressedSecondary: {
+    backgroundColor: colors.surfaceAlt,
   },
 });
 

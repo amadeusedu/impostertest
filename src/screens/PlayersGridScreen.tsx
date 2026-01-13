@@ -4,7 +4,6 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import GradientBackground from '../components/GradientBackground';
 import Card from '../components/Card';
-import PlayerAvatar from '../components/PlayerAvatar';
 import PrimaryButton from '../components/PrimaryButton';
 import { colors, spacing, typography, radii } from '../theme/tokens';
 import { RootStackParamList } from '../navigation/RootNavigator';
@@ -57,8 +56,12 @@ const PlayersGridScreen = () => {
               >
                 <Card style={[styles.card, completed && styles.cardCompleted]}>
                   <View style={styles.cardContent}>
-                    <PlayerAvatar name={item.name} size={48} />
-                    <Text style={styles.playerName}>{item.name}</Text>
+                    <Text style={styles.playerName} numberOfLines={2}>
+                      {item.name}
+                    </Text>
+                    <Text style={styles.playerHint}>
+                      {completed ? 'Answer submitted' : 'Tap to answer'}
+                    </Text>
                     {completed && <Text style={styles.check}>✓</Text>}
                   </View>
                 </Card>
@@ -116,12 +119,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   playerName: {
     color: colors.white,
-    fontSize: typography.subheading,
+    fontSize: typography.heading,
     fontWeight: '600',
+    textAlign: 'center',
+  },
+  playerHint: {
+    color: colors.icyBlue,
+    fontSize: typography.caption,
   },
   check: {
     color: colors.success,
