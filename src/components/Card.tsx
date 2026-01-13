@@ -30,6 +30,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.lg,
     backgroundColor: colors.surface,
     padding: 16,
+    flex: 1,
   },
 });
 
