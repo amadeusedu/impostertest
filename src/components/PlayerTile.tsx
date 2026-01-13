@@ -45,6 +45,7 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: typography.subheading,
     fontWeight: '600',
+    width: '100%',
     textAlign: 'center',
   },
   status: {
