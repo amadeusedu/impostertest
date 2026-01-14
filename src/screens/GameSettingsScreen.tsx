@@ -12,9 +12,11 @@ import AnimatedEntry from '../components/AnimatedEntry';
 import { colors, spacing, typography, radii, shadows } from '../theme/tokens';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useGame } from '../utils/GameContext';
+import { useAuth } from '../auth/AuthProvider';
 
 const GameSettingsScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { user, profile } = useAuth();
   const {
     players,
     imposterCount,
@@ -41,6 +43,17 @@ const GameSettingsScreen = () => {
     navigation.navigate('PlayersGrid');
   };
 
+  const handleAccountPress = () => {
+    if (user) {
+      navigation.navigate('Auth', { screen: 'Profile' });
+      return;
+    }
+    navigation.navigate('Auth', { screen: 'Login' });
+  };
+
+  const accountTitle = user ? profile?.display_name || 'Account' : 'Log in / Sign up';
+  const accountSubtitle = user ? user.email ?? 'Profile' : 'Sync your profile across devices';
+
   const categorySummary = useMemo(() => {
     if (selectedCategories.length === 0) {
       return 'All Categories';
@@ -59,6 +72,16 @@ const GameSettingsScreen = () => {
         </AnimatedEntry>
 
         <AnimatedEntry delay={80}>
+          <AnimatedPressable onPress={handleAccountPress}>
+            <Card style={styles.accountCard}>
+              <Text style={styles.cardLabel}>Account</Text>
+              <Text style={styles.cardValue}>{accountTitle}</Text>
+              <Text style={styles.cardHint}>{accountSubtitle}</Text>
+            </Card>
+          </AnimatedPressable>
+        </AnimatedEntry>
+
+        <AnimatedEntry delay={120}>
           <View style={styles.row}>
             <AnimatedPressable
               onPress={() => navigation.navigate('PlayerNames')}
@@ -85,7 +108,7 @@ const GameSettingsScreen = () => {
           </View>
         </AnimatedEntry>
 
-        <AnimatedEntry delay={140}>
+        <AnimatedEntry delay={180}>
           <Text style={styles.sectionLabel}>Game Mode</Text>
           <Card style={styles.cardShadow}>
             <View style={styles.tileSelected}>
@@ -95,7 +118,7 @@ const GameSettingsScreen = () => {
           </Card>
         </AnimatedEntry>
 
-        <AnimatedEntry delay={200}>
+        <AnimatedEntry delay={240}>
           <Text style={styles.sectionLabel}>Categories</Text>
           <AnimatedPressable onPress={() => navigation.navigate('Categories')}>
             <Card style={[styles.cardShadow, styles.cardTouchable]}>
@@ -109,7 +132,7 @@ const GameSettingsScreen = () => {
           </AnimatedPressable>
         </AnimatedEntry>
 
-        <AnimatedEntry delay={260}>
+        <AnimatedEntry delay={300}>
           <Card style={styles.toggleCard}>
             <Toggle
               label="Show Category to Imposter"
@@ -119,7 +142,7 @@ const GameSettingsScreen = () => {
           </Card>
         </AnimatedEntry>
 
-        <AnimatedEntry delay={320}>
+        <AnimatedEntry delay={360}>
           <PrimaryButton label="Start Game" onPress={handleStart} style={styles.primaryButton} />
 
           <AnimatedPressable
@@ -192,6 +215,10 @@ const styles = StyleSheet.create({
     fontSize: typography.caption,
   },
   cardShadow: {
+    ...shadows.glow,
+  },
+  accountCard: {
+    gap: spacing.xs,
     ...shadows.glow,
   },
   cardTouchable: {
