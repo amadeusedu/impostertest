@@ -1,5 +1,5 @@
-const rawSupabaseUrl = process.env.https://gdretwuorshlcgwpxzkr.supabase.co ?? '';
-const rawSupabaseAnonKey = process.env.sb_publishable_QHRQlKwoPFevLmEzh7OG_g_oaIPIaop ?? '';
+const rawSupabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
+const rawSupabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
 export const missingSupabaseConfig = !rawSupabaseUrl || !rawSupabaseAnonKey;
 
