@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigatorScreenParams } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import GameSettingsScreen from '../screens/GameSettingsScreen';
 import PlayerNamesScreen from '../screens/PlayerNamesScreen';
@@ -13,9 +13,12 @@ import RevealScreen from '../screens/RevealScreen';
 import CategoriesScreen from '../screens/CategoriesScreen';
 import CategoryDetailScreen from '../screens/CategoryDetailScreen';
 import OtherPartyGamesScreen from '../screens/OtherPartyGamesScreen';
+import AuthNavigator, { AuthStackParamList } from './AuthNavigator';
+import { navigationRef } from './navigationRef';
 
 export type RootStackParamList = {
   Settings: undefined;
+  Auth: NavigatorScreenParams<AuthStackParamList>;
   PlayerNames: undefined;
   Categories: undefined;
   CategoryDetail: { category: string };
@@ -39,7 +42,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigator = () => {
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
@@ -48,6 +51,7 @@ const RootNavigator = () => {
         }}
       >
         <Stack.Screen name="Settings" component={GameSettingsScreen} />
+        <Stack.Screen name="Auth" component={AuthNavigator} />
         <Stack.Screen
           name="PlayerNames"
           component={PlayerNamesScreen}
