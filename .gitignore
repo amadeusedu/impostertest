@@ -2,4 +2,7 @@ node_modules/
 .expo/
 .expo-shared/
 web-build/
+.env
+.env.*
+!.env.example
 .DS_Store
