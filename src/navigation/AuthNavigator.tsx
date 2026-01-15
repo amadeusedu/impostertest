@@ -5,6 +5,7 @@ import SignupScreen from '../screens/auth/SignupScreen';
 import CheckEmailScreen from '../screens/auth/CheckEmailScreen';
 import ProfileScreen from '../screens/auth/ProfileScreen';
 import AuthHomeScreen from '../screens/auth/AuthHomeScreen';
+import UnlockPremiumScreen from '../screens/premium/UnlockPremiumScreen';
 
 export type AuthStackParamList = {
   AuthHome: undefined;
@@ -12,6 +13,7 @@ export type AuthStackParamList = {
   Signup: undefined;
   CheckEmail: { email: string; mode: 'login' | 'signup' };
   Profile: undefined;
+  UnlockPremium: undefined;
 };
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -31,6 +33,7 @@ const AuthNavigator = () => {
       <Stack.Screen name="Signup" component={SignupScreen} />
       <Stack.Screen name="CheckEmail" component={CheckEmailScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="UnlockPremium" component={UnlockPremiumScreen} />
     </Stack.Navigator>
   );
 };
