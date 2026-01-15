@@ -3,7 +3,7 @@ import * as Linking from 'expo-linking';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { missingSupabaseConfig } from '../config/supabase';
-import { getRedirectUrl, parseAuthCallbackUrl } from './deeplink';
+import { AUTH_CALLBACK_PATH, parseAuthCallbackUrl } from './deeplink';
 import { navigationRef } from '../navigation/navigationRef';
 
 export type Profile = {
@@ -50,6 +50,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [pendingMode, setPendingMode] = useState<AuthMode | null>(null);
   const [needsProfileNavigation, setNeedsProfileNavigation] = useState(false);
   const processedCodes = useRef(new Set<string>());
+  const processedTokens = useRef(new Set<string>());
 
   const isConfigured = useMemo(() => !missingSupabaseConfig, []);
 
@@ -143,11 +144,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       setAuthError(null);
-      const redirectUrl = getRedirectUrl();
+      const redirectTo = Linking.createURL(AUTH_CALLBACK_PATH);
+      console.log('[AUTH] emailRedirectTo:', redirectTo);
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: redirectUrl,
+          emailRedirectTo: redirectTo,
+          shouldCreateUser: true,
         },
       });
 
@@ -163,38 +166,81 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     [isConfigured]
   );
 
-  const handleAuthCallback = useCallback(async (url: string) => {
-    const { isAuthCallback, code } = parseAuthCallbackUrl(url);
-    if (!isAuthCallback || !code) {
-      return;
-    }
+  const handleAuthCallback = useCallback(
+    async (url: string) => {
+      console.log('[AUTH] incoming url:', url);
+      const { isAuthCallback, code, accessToken, refreshToken } = parseAuthCallbackUrl(url);
+      if (!isAuthCallback) {
+        return;
+      }
 
-    if (processedCodes.current.has(code)) {
-      return;
-    }
+      setAuthError(null);
 
-    processedCodes.current.add(code);
-    setAuthError(null);
+      if (!isConfigured) {
+        setAuthError('Supabase config missing. Unable to complete login.');
+        return;
+      }
 
-    if (!isConfigured) {
-      setAuthError('Supabase config missing. Unable to complete login.');
-      return;
-    }
+      if (accessToken && refreshToken) {
+        if (processedTokens.current.has(accessToken)) {
+          return;
+        }
+        processedTokens.current.add(accessToken);
 
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) {
-      setAuthError(error.message || 'Magic link expired or already used.');
-      return;
-    }
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (error) {
+          setAuthError(error.message || 'Magic link expired or already used.');
+          return;
+        }
 
-    setSession(data.session ?? null);
+        setSession(data.session ?? null);
+        if (data.session?.user) {
+          await getOrCreateProfile(data.session.user);
+        }
+        setNeedsProfileNavigation(true);
+        return;
+      }
 
-    if (data.session?.user) {
-      await getOrCreateProfile(data.session.user);
-    }
+      if (code) {
+        if (processedCodes.current.has(code)) {
+          return;
+        }
 
-    setNeedsProfileNavigation(true);
-  }, [getOrCreateProfile, isConfigured]);
+        processedCodes.current.add(code);
+
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          setAuthError(error.message || 'Magic link expired or already used.');
+          return;
+        }
+
+        setSession(data.session ?? null);
+
+        if (data.session?.user) {
+          await getOrCreateProfile(data.session.user);
+        }
+
+        setNeedsProfileNavigation(true);
+        return;
+      }
+
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        setAuthError(error.message);
+        return;
+      }
+
+      setSession(data.session ?? null);
+      if (data.session?.user) {
+        await getOrCreateProfile(data.session.user);
+        setNeedsProfileNavigation(true);
+      }
+    },
+    [getOrCreateProfile, isConfigured]
+  );
 
   useEffect(() => {
     const handleInitialUrl = async () => {
@@ -221,14 +267,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (navigationRef.isReady()) {
-      navigationRef.navigate('Auth', { screen: 'Profile' });
+      navigationRef.navigate('Settings');
       setNeedsProfileNavigation(false);
       return;
     }
 
     const interval = setInterval(() => {
       if (navigationRef.isReady()) {
-        navigationRef.navigate('Auth', { screen: 'Profile' });
+        navigationRef.navigate('Settings');
         setNeedsProfileNavigation(false);
         clearInterval(interval);
       }
