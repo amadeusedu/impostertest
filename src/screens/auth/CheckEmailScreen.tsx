@@ -32,7 +32,9 @@ const CheckEmailScreen = ({ route }: CheckEmailScreenProps) => {
       <View style={styles.container}>
         <AnimatedEntry>
           <Text style={styles.title}>Check your email</Text>
-          <Text style={styles.subtitle}>We sent a magic link to {email}.</Text>
+          <Text style={styles.subtitle}>
+            We sent a magic link to {email}. Check your email, then return to the app.
+          </Text>
         </AnimatedEntry>
 
         <AnimatedEntry delay={120}>
