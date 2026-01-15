@@ -5,6 +5,8 @@ import { supabase } from '../lib/supabase';
 import { missingSupabaseConfig } from '../config/supabase';
 import { AUTH_CALLBACK_PATH, parseAuthCallbackUrl } from './deeplink';
 import { navigationRef } from '../navigation/navigationRef';
+import { usePremium } from '../purchases/usePremium';
+import { logInRevenueCat, logOutRevenueCat } from '../purchases/revenuecat';
 
 export type Profile = {
   id: string;
@@ -53,6 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const processedTokens = useRef(new Set<string>());
 
   const isConfigured = useMemo(() => !missingSupabaseConfig, []);
+  const { refresh: refreshPremium, clearCustomerInfo } = usePremium();
 
   const clearAuthError = useCallback(() => setAuthError(null), []);
 
@@ -134,6 +137,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       getOrCreateProfile(session.user);
     }
   }, [getOrCreateProfile, session?.user]);
+
+  useEffect(() => {
+    const syncRevenueCat = async () => {
+      if (session?.user?.id) {
+        await logInRevenueCat(session.user.id);
+        await refreshPremium();
+        return;
+      }
+
+      await logOutRevenueCat();
+      clearCustomerInfo();
+    };
+
+    syncRevenueCat();
+  }, [clearCustomerInfo, refreshPremium, session?.user?.id]);
 
   const sendMagicLink = useCallback(
     async (email: string, mode: AuthMode) => {
@@ -317,9 +335,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = useCallback(async () => {
     setAuthError(null);
     await supabase.auth.signOut();
+    await logOutRevenueCat();
+    clearCustomerInfo();
     setSession(null);
     setProfile(null);
-  }, []);
+  }, [clearCustomerInfo]);
 
   const value = useMemo(
     () => ({
