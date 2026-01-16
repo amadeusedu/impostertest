@@ -7,11 +7,16 @@
     "userInterfaceStyle": "dark",
     "scheme": "imposter",
     "jsEngine": "hermes",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "extra": {
       "eas": {
-        "projectId": "00000000-0000-0000-0000-000000000000"
+        "projectId": "288b97dc-64cc-4e08-8256-25beeb9f501b"
       }
-    }
+    },
+    "owner": "nicf"
   }
 }
