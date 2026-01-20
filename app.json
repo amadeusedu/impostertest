@@ -17,6 +17,9 @@
         "projectId": "288b97dc-64cc-4e08-8256-25beeb9f501b"
       }
     },
-    "owner": "nicf"
+    "owner": "nicf",
+    "android": {
+      "package": "com.partyhub.imposter"
+    }
   }
 }
