@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import GradientBackground from '../components/GradientBackground';
@@ -17,6 +18,7 @@ import { useAuth } from '../auth/AuthProvider';
 const GameSettingsScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, profile } = useAuth();
+  const insets = useSafeAreaInsets();
   const {
     players,
     imposterCount,
@@ -66,7 +68,9 @@ const GameSettingsScreen = () => {
 
   return (
     <GradientBackground>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={[styles.container, { paddingTop: insets.top + spacing.lg }]}
+      >
         <AnimatedEntry>
           <Text style={styles.title}>Game Settings</Text>
         </AnimatedEntry>
