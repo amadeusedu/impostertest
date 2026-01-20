@@ -1,5 +1,5 @@
-import { Platform } from 'react-native';
 import Purchases, { CustomerInfo, PurchasesPackage } from 'react-native-purchases';
+import { assertRevenueCatConfigured, REVENUECAT_API_KEY } from '../config/revenuecat';
 
 type ConstantsModule = { appOwnership?: string } | { default?: { appOwnership?: string } };
 
@@ -25,13 +25,7 @@ export const isExpoGo = () => {
 };
 
 export const getRevenueCatApiKey = () => {
-  if (Platform.OS === 'ios') {
-    return process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY;
-  }
-  if (Platform.OS === 'android') {
-    return process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY;
-  }
-  return null;
+  return REVENUECAT_API_KEY;
 };
 
 export const configureRevenueCat = () => {
@@ -42,7 +36,7 @@ export const configureRevenueCat = () => {
   configurationAttempted = true;
   const apiKey = getRevenueCatApiKey();
   if (!apiKey) {
-    console.warn('[RC] Missing RevenueCat API key. Skipping configuration.');
+    assertRevenueCatConfigured();
     return;
   }
 
