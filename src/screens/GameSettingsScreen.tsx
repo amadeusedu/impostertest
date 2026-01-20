@@ -232,6 +232,7 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     alignItems: 'center',
+    marginTop: spacing.md,
     paddingVertical: spacing.md,
     borderRadius: radii.pill,
     borderWidth: 1,
