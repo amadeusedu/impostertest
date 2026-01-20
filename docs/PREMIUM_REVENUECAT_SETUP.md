@@ -18,14 +18,13 @@ This app uses RevenueCat to unlock a **Premium** subscription entitlement.
 
 ## Environment Variables
 
-Add the RevenueCat public API keys to your environment:
+Add the RevenueCat public API key to your environment:
 
 ```
-EXPO_PUBLIC_REVENUECAT_IOS_API_KEY=
-EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY=
+EXPO_PUBLIC_REVENUECAT_API_KEY=
 ```
 
-These keys must be present at runtime. The UI will show **Not configured** when missing.
+The key must be present at runtime. The UI will show **Not configured** when missing.
 
 ## Expo Go Limitations
 
