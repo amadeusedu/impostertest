@@ -64,6 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
+    console.log('[AUTH] profile lookup start', { userId: user.id, email: user.email ?? null });
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -71,6 +72,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .maybeSingle();
 
     if (error) {
+      console.log('[AUTH] profile lookup error', { message: error.message });
       setAuthError(error.message);
       return;
     }
@@ -81,6 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const displayName = getDisplayNameFallback(user);
+    console.log('[AUTH] profile upsert start', { userId: user.id });
     const { data: upserted, error: upsertError } = await supabase
       .from('profiles')
       .upsert(
@@ -95,10 +98,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .single();
 
     if (upsertError) {
+      console.log('[AUTH] profile upsert error', { message: upsertError.message });
       setAuthError(upsertError.message);
       return;
     }
 
+    console.log('[AUTH] profile upsert success', { userId: user.id });
     setProfile(upserted as Profile);
   }, [isConfigured]);
 
@@ -188,6 +193,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     async (url: string) => {
       console.log('[AUTH] incoming url:', url);
       const { isAuthCallback, code, accessToken, refreshToken } = parseAuthCallbackUrl(url);
+      console.log('[AUTH] parsed callback', {
+        isAuthCallback,
+        hasCode: Boolean(code),
+        hasAccessToken: Boolean(accessToken),
+        hasRefreshToken: Boolean(refreshToken),
+      });
       if (!isAuthCallback) {
         return;
       }
