@@ -2,7 +2,7 @@ import * as Linking from 'expo-linking';
 
 export const AUTH_CALLBACK_PATH = 'auth/callback';
 
-export const getRedirectUrl = () => Linking.createURL(AUTH_CALLBACK_PATH);
+export const getSupabaseRedirectUrl = () => Linking.createURL(AUTH_CALLBACK_PATH);
 
 export const parseAuthCallbackUrl = (url: string) => {
   const parsed = Linking.parse(url);
