@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -18,7 +18,6 @@ import Card from '../../components/Card';
 import { colors, radii, spacing, typography } from '../../theme/tokens';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import { useAuth } from '../../auth/AuthProvider';
-import { getRedirectUrl } from '../../auth/deeplink';
 import { missingSupabaseConfig } from '../../config/supabase';
 
 const SignupScreen = () => {
@@ -28,8 +27,6 @@ const SignupScreen = () => {
   const [localError, setLocalError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
-
-  const redirectUrl = useMemo(() => getRedirectUrl(), []);
 
   const handleSend = async () => {
     const trimmed = email.trim();

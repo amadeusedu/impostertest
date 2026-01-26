@@ -3,7 +3,7 @@ import * as Linking from 'expo-linking';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { missingSupabaseConfig } from '../config/supabase';
-import { AUTH_CALLBACK_PATH, parseAuthCallbackUrl } from './deeplink';
+import { getSupabaseRedirectUrl, parseAuthCallbackUrl } from './deeplink';
 import { navigationRef } from '../navigation/navigationRef';
 import { usePremium } from '../purchases/usePremium';
 import { logInRevenueCat, logOutRevenueCat } from '../purchases/revenuecat';
@@ -27,7 +27,7 @@ interface AuthContextValue {
   pendingEmail: string | null;
   pendingMode: AuthMode | null;
   sendMagicLink: (email: string, mode: AuthMode) => Promise<{ success: boolean; error?: string }>;
-  handleAuthCallback: (url: string) => Promise<void>;
+  handleAuthRedirect: (url: string) => Promise<boolean>;
   updateDisplayName: (displayName: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   clearAuthError: () => void;
@@ -53,6 +53,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [needsProfileNavigation, setNeedsProfileNavigation] = useState(false);
   const processedCodes = useRef(new Set<string>());
   const processedTokens = useRef(new Set<string>());
+  const lastHandledUrlRef = useRef<string | null>(null);
+  const lastEnsuredUserIdRef = useRef<string | null>(null);
 
   const isConfigured = useMemo(() => !missingSupabaseConfig, []);
   const { refresh: refreshPremium, clearCustomerInfo } = usePremium();
@@ -64,7 +66,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    console.log('[AUTH] profile lookup start', { userId: user.id, email: user.email ?? null });
+    if (__DEV__) {
+      console.log('[AUTH] profile lookup start', { userId: user.id, email: user.email ?? null });
+    }
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -72,7 +76,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .maybeSingle();
 
     if (error) {
-      console.log('[AUTH] profile lookup error', { message: error.message });
+      if (__DEV__) {
+        console.log('[AUTH] profile lookup error', { message: error.message });
+      }
       setAuthError(error.message);
       return;
     }
@@ -83,7 +89,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const displayName = getDisplayNameFallback(user);
-    console.log('[AUTH] profile upsert start', { userId: user.id });
+    if (__DEV__) {
+      console.log('[AUTH] profile upsert start', { userId: user.id });
+    }
     const { data: upserted, error: upsertError } = await supabase
       .from('profiles')
       .upsert(
@@ -98,14 +106,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .single();
 
     if (upsertError) {
-      console.log('[AUTH] profile upsert error', { message: upsertError.message });
+      if (__DEV__) {
+        console.log('[AUTH] profile upsert error', { message: upsertError.message });
+      }
       setAuthError(upsertError.message);
       return;
     }
 
-    console.log('[AUTH] profile upsert success', { userId: user.id });
+    if (__DEV__) {
+      console.log('[AUTH] profile upsert success', { userId: user.id });
+    }
     setProfile(upserted as Profile);
   }, [isConfigured]);
+
+  const ensureProfileForUser = useCallback(
+    async (user: User) => {
+      if (lastEnsuredUserIdRef.current === user.id) {
+        return;
+      }
+
+      lastEnsuredUserIdRef.current = user.id;
+      await getOrCreateProfile(user);
+    },
+    [getOrCreateProfile]
+  );
 
   const refreshSession = useCallback(async () => {
     if (!isConfigured) {
@@ -125,23 +149,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     refreshSession();
 
-    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data } = supabase.auth.onAuthStateChange((event, nextSession) => {
       setSession(nextSession);
       if (!nextSession?.user) {
         setProfile(null);
+        lastEnsuredUserIdRef.current = null;
+      } else if (event === 'SIGNED_IN') {
+        void ensureProfileForUser(nextSession.user);
       }
     });
 
     return () => {
       data.subscription?.unsubscribe();
     };
-  }, [refreshSession]);
+  }, [ensureProfileForUser, refreshSession]);
 
   useEffect(() => {
     if (session?.user) {
-      getOrCreateProfile(session.user);
+      void ensureProfileForUser(session.user);
     }
-  }, [getOrCreateProfile, session?.user]);
+  }, [ensureProfileForUser, session?.user]);
 
   useEffect(() => {
     const syncRevenueCat = async () => {
@@ -167,8 +194,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       setAuthError(null);
-      const redirectTo = Linking.createURL(AUTH_CALLBACK_PATH);
-      console.log('[AUTH] emailRedirectTo:', redirectTo);
+      const redirectTo = getSupabaseRedirectUrl();
+      if (__DEV__) {
+        console.log('[AUTH] emailRedirectTo:', redirectTo);
+        console.log('[AUTH] Add this URL to Supabase Auth → Redirect URLs:', redirectTo);
+      }
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -189,106 +219,134 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     [isConfigured]
   );
 
-  const handleAuthCallback = useCallback(
+  const handleAuthRedirect = useCallback(
     async (url: string) => {
-      console.log('[AUTH] incoming url:', url);
+      if (!url) {
+        return false;
+      }
+
+      if (lastHandledUrlRef.current === url) {
+        return false;
+      }
+
+      lastHandledUrlRef.current = url;
+
+      if (__DEV__) {
+        console.log('[AUTH] incoming url:', url);
+      }
+
       const { isAuthCallback, code, accessToken, refreshToken } = parseAuthCallbackUrl(url);
-      console.log('[AUTH] parsed callback', {
-        isAuthCallback,
-        hasCode: Boolean(code),
-        hasAccessToken: Boolean(accessToken),
-        hasRefreshToken: Boolean(refreshToken),
-      });
+      if (__DEV__) {
+        console.log('[AUTH] parsed callback', {
+          isAuthCallback,
+          hasCode: Boolean(code),
+          hasAccessToken: Boolean(accessToken),
+          hasRefreshToken: Boolean(refreshToken),
+        });
+      }
+
       if (!isAuthCallback) {
-        return;
+        return false;
       }
 
       setAuthError(null);
 
       if (!isConfigured) {
-        setAuthError('Supabase config missing. Unable to complete login.');
-        return;
+        const message = 'Supabase config missing. Unable to complete login.';
+        setAuthError(message);
+        if (__DEV__) {
+          console.log('[AUTH] config error:', message);
+        }
+        return false;
       }
 
-      if (accessToken && refreshToken) {
-        if (processedTokens.current.has(accessToken)) {
-          return;
-        }
-        processedTokens.current.add(accessToken);
+      try {
+        if (accessToken && refreshToken) {
+          if (processedTokens.current.has(accessToken)) {
+            return false;
+          }
+          processedTokens.current.add(accessToken);
 
-        const { data, error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (error) {
+            setAuthError(error.message || 'Magic link expired or already used.');
+            if (__DEV__) {
+              console.log('[AUTH] setSession error', { message: error.message });
+            }
+            return false;
+          }
+        } else if (code) {
+          if (processedCodes.current.has(code)) {
+            return false;
+          }
+
+          processedCodes.current.add(code);
+
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) {
+            setAuthError(error.message || 'Magic link expired or already used.');
+            if (__DEV__) {
+              console.log('[AUTH] exchangeCodeForSession error', { message: error.message });
+            }
+            return false;
+          }
+        }
+
+        const { data, error } = await supabase.auth.getSession();
         if (error) {
-          setAuthError(error.message || 'Magic link expired or already used.');
-          return;
+          setAuthError(error.message);
+          if (__DEV__) {
+            console.log('[AUTH] getSession error', { message: error.message });
+          }
+          return false;
         }
 
-        setSession(data.session ?? null);
-        if (data.session?.user) {
-          await getOrCreateProfile(data.session.user);
+        const nextSession = data.session ?? null;
+        setSession(nextSession);
+
+        if (__DEV__) {
+          console.log('[AUTH] session after redirect', { hasSession: Boolean(nextSession) });
         }
-        setNeedsProfileNavigation(true);
-        return;
+
+        if (nextSession?.user) {
+          await ensureProfileForUser(nextSession.user);
+          setNeedsProfileNavigation(true);
+          return true;
+        }
+      } catch (error) {
+        if (__DEV__) {
+          console.log('[AUTH] handle redirect error', { error });
+        }
+        setAuthError('Unable to complete login. Please try again.');
+        return false;
       }
 
-      if (code) {
-        if (processedCodes.current.has(code)) {
-          return;
-        }
-
-        processedCodes.current.add(code);
-
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error) {
-          setAuthError(error.message || 'Magic link expired or already used.');
-          return;
-        }
-
-        setSession(data.session ?? null);
-
-        if (data.session?.user) {
-          await getOrCreateProfile(data.session.user);
-        }
-
-        setNeedsProfileNavigation(true);
-        return;
-      }
-
-      const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        setAuthError(error.message);
-        return;
-      }
-
-      setSession(data.session ?? null);
-      if (data.session?.user) {
-        await getOrCreateProfile(data.session.user);
-        setNeedsProfileNavigation(true);
-      }
+      return false;
     },
-    [getOrCreateProfile, isConfigured]
+    [ensureProfileForUser, isConfigured]
   );
 
   useEffect(() => {
     const handleInitialUrl = async () => {
       const initialUrl = await Linking.getInitialURL();
       if (initialUrl) {
-        await handleAuthCallback(initialUrl);
+        await handleAuthRedirect(initialUrl);
       }
     };
 
     handleInitialUrl();
 
     const subscription = Linking.addEventListener('url', ({ url }) => {
-      handleAuthCallback(url);
+      handleAuthRedirect(url);
     });
 
     return () => {
       subscription.remove();
     };
-  }, [handleAuthCallback]);
+  }, [handleAuthRedirect]);
 
   useEffect(() => {
     if (!needsProfileNavigation) {
@@ -350,6 +408,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     clearCustomerInfo();
     setSession(null);
     setProfile(null);
+    lastEnsuredUserIdRef.current = null;
   }, [clearCustomerInfo]);
 
   const value = useMemo(
@@ -362,7 +421,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       pendingEmail,
       pendingMode,
       sendMagicLink,
-      handleAuthCallback,
+      handleAuthRedirect,
       updateDisplayName,
       signOut,
       clearAuthError,
@@ -371,7 +430,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     [
       authError,
       clearAuthError,
-      handleAuthCallback,
+      handleAuthRedirect,
       loading,
       pendingEmail,
       pendingMode,
