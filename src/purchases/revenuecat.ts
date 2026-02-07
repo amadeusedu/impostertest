@@ -5,6 +5,7 @@ type ConstantsModule = { appOwnership?: string } | { default?: { appOwnership?: 
 
 let isConfigured = false;
 let configurationAttempted = false;
+let hasLoggedIn = false;
 
 const getConstants = (): { appOwnership?: string } | null => {
   try {
@@ -59,6 +60,7 @@ export const logInRevenueCat = async (appUserId: string) => {
       return;
     }
     await Purchases.logIn(appUserId);
+    hasLoggedIn = true;
   } catch (error) {
     console.warn('[RC] Failed to log in:', error);
   }
@@ -67,10 +69,11 @@ export const logInRevenueCat = async (appUserId: string) => {
 export const logOutRevenueCat = async () => {
   try {
     configureRevenueCat();
-    if (!isConfigured) {
+    if (!isConfigured || !hasLoggedIn) {
       return;
     }
     await Purchases.logOut();
+    hasLoggedIn = false;
   } catch (error) {
     console.warn('[RC] Failed to log out:', error);
   }

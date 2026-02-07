@@ -50,9 +50,19 @@ export const PremiumProvider = ({ children }: { children: React.ReactNode }) => 
       configureRevenueCat();
       if (!isConfigured) {
         setOfferings(null);
+        setError(
+          'RevenueCat is not configured. Set REVENUECAT_API_KEY and create a default offering in RevenueCat (Offerings -> Default) to load subscription options.'
+        );
         return;
       }
       const response = await Purchases.getOfferings();
+      if (!response.current) {
+        setOfferings(null);
+        setError(
+          'No RevenueCat default offering found. Create a default offering in RevenueCat (Offerings -> Default) to show subscription options.'
+        );
+        return;
+      }
       setOfferings(response);
     } catch (err) {
       console.warn('[RC] Failed to fetch offerings:', err);
